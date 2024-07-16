@@ -185,22 +185,22 @@ class RqtHandeyeCalibratorWidget(QWidget):
         rotation_has_moved = RqtHandeyeCalibratorWidget._rotation_distance(t1, t2) > ROTATION_TOLERANCE_RAD
         return translation_has_moved or rotation_has_moved
 
-    def _check_still_moving(self):
-        new_transforms = self.client.get_current_transforms()
+    def _check_still_moving(self, new_transforms):
         if self._current_transforms is None:
             self._current_transforms = new_transforms
             return False
+        else:
+            robot_is_moving = RqtHandeyeCalibratorWidget._has_moved(new_transforms.robot, self._current_transforms.robot)
+            tracking_is_moving = RqtHandeyeCalibratorWidget._has_moved(new_transforms.tracking,
+                                                                    self._current_transforms.tracking)
 
-        robot_is_moving = RqtHandeyeCalibratorWidget._has_moved(new_transforms.robot, self._current_transforms.robot)
-        tracking_is_moving = RqtHandeyeCalibratorWidget._has_moved(new_transforms.tracking,
-                                                                   self._current_transforms.tracking)
+            self._current_transforms = new_transforms
 
-        self._current_transforms = new_transforms
-
-        return robot_is_moving or tracking_is_moving
+            return robot_is_moving or tracking_is_moving
 
     def _updateUI(self):
-        if self._check_still_moving():
+        new_transforms = self.client.get_current_transforms()
+        if new_transforms is None or self._check_still_moving(new_transforms):
             self._widget.takeButton.setEnabled(False)
         else:
             self._widget.takeButton.setEnabled(True)

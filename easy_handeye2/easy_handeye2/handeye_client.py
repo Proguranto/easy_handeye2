@@ -65,7 +65,10 @@ class HandeyeClient:
     # services: sampling
 
     def get_current_transforms(self):
-        return self.get_current_transforms_client.call(ehm.srv.TakeSample.Request()).samples.samples[0]
+        curr_tf = self.get_current_transforms_client.call(ehm.srv.TakeSample.Request()).samples.samples
+        if len(curr_tf) == 0:
+            return None
+        return curr_tf[0]
 
     def get_sample_list(self):
         return self.get_sample_client.call(ehm.srv.TakeSample.Request()).samples

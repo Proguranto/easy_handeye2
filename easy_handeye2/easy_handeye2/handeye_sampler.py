@@ -58,7 +58,7 @@ class HandeyeSampler:
         self.node.get_logger().info(f'Robot transform: {base_frame} -> {effector_frame}')
         self.node.get_logger().info(f'Tracking transform: {camera_frame} -> {marker_frame}')
         try:
-            self.tfBuffer.lookup_transform(base_frame, effector_frame, Time(), Duration(seconds=10))
+            self.tfBuffer.lookup_transform(base_frame, effector_frame, Time(), Duration(seconds=30))
         except tf2_ros.TransformException as e:
             self.node.get_logger().error(
                 'The specified tf frames for the robot base and hand do not seem to be connected')
@@ -70,7 +70,7 @@ class HandeyeSampler:
             return False
 
         try:
-            self.tfBuffer.lookup_transform(camera_frame, marker_frame, Time(), Duration(seconds=10))
+            self.tfBuffer.lookup_transform(camera_frame, marker_frame, Time(), Duration(seconds=30))
         except tf2_ros.TransformException as e:
             self.node.get_logger().error(
                 'The specified tf frames for the tracking system base/camera and marker do not seem to be connected')
@@ -84,31 +84,38 @@ class HandeyeSampler:
         self.node.get_logger().info('All expected transforms are available on tf; ready to take samples')
         return True
 
-    def _get_transforms(self, time: Optional[rclpy.time.Time] = None) -> easy_handeye2_msgs.msg.Sample:
+    def _get_transforms(self, time: Optional[rclpy.time.Time] = None) -> Sample | None:
         """
         Samples the transforms at the given time.
         """
         if time is None:
             time = self.node.get_clock().now() - rclpy.time.Duration(nanoseconds=200000000)
 
-        # here we trick the library (it is actually made for eye_in_hand only). Trust me, I'm an engineer
-        if self.handeye_parameters.calibration_type == 'eye_in_hand':
-            robot = self.tfBuffer.lookup_transform(self.handeye_parameters.robot_base_frame,
-                                                   self.handeye_parameters.robot_effector_frame, time,
-                                                   Duration(seconds=10))
-        else:
-            robot = self.tfBuffer.lookup_transform(self.handeye_parameters.robot_effector_frame,
-                                                   self.handeye_parameters.robot_base_frame, time,
-                                                   Duration(seconds=10))
-        tracking = self.tfBuffer.lookup_transform(self.handeye_parameters.tracking_base_frame,
-                                                  self.handeye_parameters.tracking_marker_frame, time,
-                                                  Duration(seconds=10))
+        try:
+            # here we trick the library (it is actually made for eye_in_hand only). Trust me, I'm an engineer
+            if self.handeye_parameters.calibration_type == 'eye_in_hand':
+                robot = self.tfBuffer.lookup_transform(self.handeye_parameters.robot_base_frame,
+                                                    self.handeye_parameters.robot_effector_frame, time,
+                                                    Duration(seconds=1))
+            else:
+                robot = self.tfBuffer.lookup_transform(self.handeye_parameters.robot_effector_frame,
+                                                    self.handeye_parameters.robot_base_frame, time,
+                                                    Duration(seconds=1))
+            tracking = self.tfBuffer.lookup_transform(self.handeye_parameters.tracking_base_frame,
+                                                    self.handeye_parameters.tracking_marker_frame, time,
+                                                    Duration(seconds=1))
+
+        except:
+            self.node.get_logger().error(f"Failed to get tracking transform")
+            return None
+            
         ret = Sample()
         ret.robot = robot.transform
         ret.tracking = tracking.transform
         return ret
 
-    def current_transforms(self) -> Sample:
+
+    def current_transforms(self) -> Sample | None:
         return self._get_transforms()
 
     def take_sample(self) -> bool:
@@ -119,6 +126,8 @@ class HandeyeSampler:
             self.node.get_logger().info("Taking a sample...")
             self.node.get_logger().info("all frames: " + self.tfBuffer.all_frames_as_string())
             sample = self._get_transforms()
+            if sample is None:
+                return False
             self.node.get_logger().info("Got a sample")
             new_samples = self.samples.samples
             new_samples.append(sample)
