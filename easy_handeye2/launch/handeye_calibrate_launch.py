@@ -8,7 +8,11 @@ from launch.substitutions import (
 from launch.actions import (
     IncludeLaunchDescription,
     DeclareLaunchArgument,
+    TimerAction,
+    ExecuteProcess,
+    GroupAction,
 )
+from launch.conditions import IfCondition
 
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
@@ -22,6 +26,7 @@ def generate_launch_description():
         ("robot_file", "geodude_hardware.launch.py", "Robot\'s launch file to setup base to effector frame."),
         ("use_left", "true", "Use left hardware"),
         ("use_right", "true", "Use right hardware"),
+        ("use_right_hand", "true", "Use right hand hardware"),
         ("use_left_hand", "true", "Use left hand hardware"),
         ("sim", "mock", "Simulation mode"),
         ("moveit_package", "geodude_moveit", "Robot moveit package."),
@@ -61,6 +66,7 @@ def generate_launch_description():
             "use_left": LaunchConfiguration("use_left"),
             "use_right": LaunchConfiguration("use_right"),
             "use_left_hand": LaunchConfiguration("use_left_hand"),
+            "use_right_hand": LaunchConfiguration("use_right_hand"),
             "sim": LaunchConfiguration("sim"),
         }.items()
     )
@@ -103,41 +109,114 @@ def generate_launch_description():
         ]
     )
 
-    easy_handeye_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            PathJoinSubstitution([
-                FindPackageShare(LaunchConfiguration("easy_handeye_package")),
-                "launch",
-                LaunchConfiguration("easy_handeye_file"),
-            ])
-        ]),
-        launch_arguments={
-            "calibration_type": LaunchConfiguration("calibration_type"),
-            "name": LaunchConfiguration("name"),
-            "robot_base_frame": LaunchConfiguration("robot_base_frame"),
-            "robot_effector_frame": LaunchConfiguration("robot_effector_frame"),
-            "tracking_base_frame": LaunchConfiguration("tracking_base_frame"),
-            "tracking_marker_frame": LaunchConfiguration("tracking_marker_frame"),
-        }.items()
+    activate_right_arm_action = TimerAction(
+        period=4.0,
+        actions=[
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "right_arm_controller", "active"],
+                output="screen",
+                shell=True
+            ),
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_right_arm", "active"],
+                output="screen",
+                shell=True
+            )
+        ],
+        condition=IfCondition(LaunchConfiguration("use_right"))
     )
 
-    publish_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            PathJoinSubstitution([
-                FindPackageShare(LaunchConfiguration("easy_handeye_package")),
-                "launch",
-                LaunchConfiguration("publish_file")
-            ])
-        ]),
-        launch_arguments={
-            "name": LaunchConfiguration("name"),
-        }.items()
+    activate_left_arm_action = TimerAction(
+        period=4.0,
+        actions=[
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "left_arm_controller", "active"],
+                output="screen",
+                shell=True
+            ),
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_left_arm", "active"],
+                output="screen",
+                shell=True
+            )
+        ],
+        condition=IfCondition(LaunchConfiguration("use_left"))
+    )
+    
+    activate_right_hand_action = TimerAction(
+        period=4.0,
+        actions=[
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "right_hand_controller", "active"],
+                output="screen",
+                shell=True
+            ),
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_right_hand", "active"],
+                output="screen",
+                shell=True
+            )
+        ],
+        condition=IfCondition(LaunchConfiguration("use_right_hand"))
     )
 
-    launch_p1 = [robot_launch, moveit_launch, tracker_launch]
+    activate_left_hand_action = TimerAction(
+        period=4.0,
+        actions=[
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "left_hand_controller", "active"],
+                output="screen",
+                shell=True
+            ),
+            ExecuteProcess(
+                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_left_hand", "active"],
+                output="screen",
+                shell=True
+            )
+        ],
+        condition=IfCondition(LaunchConfiguration("use_left_hand"))
+    )
+
+    easy_handeye_action = TimerAction(
+        period=6.0,
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([
+                    PathJoinSubstitution([
+                        FindPackageShare(LaunchConfiguration("easy_handeye_package")),
+                        "launch",
+                        LaunchConfiguration("easy_handeye_file"),
+                    ])
+                ]),
+                launch_arguments={
+                    "calibration_type": LaunchConfiguration("calibration_type"),
+                    "name": LaunchConfiguration("name"),
+                    "robot_base_frame": LaunchConfiguration("robot_base_frame"),
+                    "robot_effector_frame": LaunchConfiguration("robot_effector_frame"),
+                    "tracking_base_frame": LaunchConfiguration("tracking_base_frame"),
+                    "tracking_marker_frame": LaunchConfiguration("tracking_marker_frame"),
+                }.items()
+            )
+        ]
+    ) 
+
+    # publish_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([
+    #         PathJoinSubstitution([
+    #             FindPackageShare(LaunchConfiguration("easy_handeye_package")),
+    #             "launch",
+    #             LaunchConfiguration("publish_file")
+    #         ])
+    #     ]),
+    #     launch_arguments={
+    #         "name": LaunchConfiguration("name"),
+    #     }.items()
+    # )
+
+    launch = [robot_launch, moveit_launch, tracker_launch]
 
     nodes = [apriltag_node]
 
-    launch_p2 = [easy_handeye_launch]
+    actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
     
-    return LaunchDescription(declared_arguments + launch_p1 + nodes + launch_p2)
+    return LaunchDescription(declared_arguments + launch + nodes + actions)

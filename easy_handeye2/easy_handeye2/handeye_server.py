@@ -46,9 +46,9 @@ class HandeyeServer(rclpy.node.Node):
         self.last_calibration = None
 
     def setup_services_and_topics(self):
-        if not self.sampler.wait_for_tf_init():
-            self.get_logger().warn('Waiting for TF initialization...')
-            return
+        # if not self.sampler.wait_for_tf_init():
+        #     self.get_logger().warn('Waiting for TF initialization...')
+        #     return
 
         # setup calibration services and topics
 
@@ -116,7 +116,6 @@ class HandeyeServer(rclpy.node.Node):
     def get_current_transforms(self, _, response: ehm.srv.TakeSample.Response):
         curr_tf = self.sampler.current_transforms()
         response.samples.samples = [] if curr_tf is None else [curr_tf]
-        self.get_logger().info(f"nothing wrong so far")
         return response
 
     def get_sample_lists(self, _, response: ehm.srv.TakeSample.Response):
