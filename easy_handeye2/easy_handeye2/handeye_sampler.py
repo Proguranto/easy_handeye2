@@ -88,8 +88,10 @@ class HandeyeSampler:
         """
         Samples the transforms at the given time.
         """
-        if time is None:
-            time = self.node.get_clock().now() - rclpy.time.Duration(nanoseconds=200000000)
+        # if time is None:
+        #     time = self.node.get_clock().now() - rclpy.time.Duration(nanoseconds=200000000)
+
+        time = rclpy.time.Time()
 
         try:
             # here we trick the library (it is actually made for eye_in_hand only). Trust me, I'm an engineer

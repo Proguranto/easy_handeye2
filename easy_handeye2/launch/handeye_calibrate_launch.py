@@ -41,7 +41,7 @@ def generate_launch_description():
         ("easy_handeye_package", "easy_handeye2", "Package containing easy_handeye2."),
         ("easy_handeye_file", "calibrate.launch.py", "Calibration file for easy_handeye2."),
         ("calibration_type", "eye_on_base", "Type of calibration"),
-        ("name", "my_eib_calib", "Name of the calibration"),
+        ("name", "my_eob_calib", "Name of the calibration"),
         ("robot_base_frame", "right_wam_base", "Robot base frame"),
         ("robot_effector_frame", "right_wam5", "Robot effector frame"),
         ("tracking_base_frame", "camera_link", "Tracking base frame"),
@@ -213,10 +213,12 @@ def generate_launch_description():
     #     }.items()
     # )
 
-    launch = [robot_launch, moveit_launch, tracker_launch]
+    launch = [moveit_launch, tracker_launch]
+    # launch = [robot_launch, moveit_launch, tracker_launch]
 
     nodes = [apriltag_node]
 
-    actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
+    actions = [easy_handeye_action]
+    # actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
     
     return LaunchDescription(declared_arguments + launch + nodes + actions)
