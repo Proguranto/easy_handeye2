@@ -21,6 +21,11 @@ def generate_launch_description():
                                 arguments=f'--x 1 --y 0 --z 0 --qx 0 --qy 0 --qz 0 --qw 1'.split(' ') + ['--frame-id', LaunchConfiguration('robot_base_frame'),
                                                                                                          '--child-frame-id', LaunchConfiguration('tracking_base_frame')])
 
+    node_ee_to_apriltag = Node(package='tf2_ros', executable='static_transform_publisher', name='dummy_publisher',
+                                condition=LaunchConfigurationEquals('calibration_type', 'eye_on_base'),
+                                arguments=f'--x 0.05132 --y 0 --z -0.00943 --yaw -1.5707963267948966 --pitch 0.0 --roll -1.5707963267948966'.split(' ') + ['--frame-id', "right_hand_base",
+                                                                                                         '--child-frame-id', LaunchConfiguration("robot_effector_frame")])
+
     handeye_server = Node(package='easy_handeye2', executable='handeye_server', name='handeye_server', parameters=[{
         'name': LaunchConfiguration('name'),
         'calibration_type': LaunchConfiguration('calibration_type'),
@@ -51,6 +56,7 @@ def generate_launch_description():
         arg_robot_effector_frame,
         node_dummy_calib_eih,
         node_dummy_calib_eob,
+        node_ee_to_apriltag,
         handeye_server,
         handeye_rqt_calibrator,
     ])
