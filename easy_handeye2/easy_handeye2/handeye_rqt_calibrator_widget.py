@@ -223,7 +223,7 @@ class RqtHandeyeCalibratorWidget(QWidget):
             if result.valid:
                 tr = result.calibration.transform.translation
                 qt = result.calibration.transform.rotation
-                t = f'Translation\n\tx: {tr.x:.6f}\n\ty: {tr.y:.6f}\n\tz: {tr.z:.6f})\nRotation\n\tx: {qt.x:.6f}\n\ty: {qt.y:.6f}\n\tz: {qt.z:.6f}\n\tw: {qt.w:.6f}'
+                t = f'Translation:\n\tx: {tr.x:.6f}\n\ty: {tr.y:.6f}\n\tz: {tr.z:.6f})\nRotation:\n\tx: {qt.x:.6f}\n\ty: {qt.y:.6f}\n\tz: {qt.z:.6f}\n\tw: {qt.w:.6f}'
                 self._widget.outputBox.setPlainText(t)
                 self._widget.saveButton.setEnabled(True)
             else:
