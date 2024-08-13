@@ -92,20 +92,18 @@ class HandeyeSampler:
         #     time = self.node.get_clock().now() - rclpy.time.Duration(nanoseconds=200000000)
 
         time = rclpy.time.Time()
+        tracker_time = self.node.get_clock().now() - rclpy.time.Duration(seconds=1)
 
         try:
             # here we trick the library (it is actually made for eye_in_hand only). Trust me, I'm an engineer
             if self.handeye_parameters.calibration_type == 'eye_in_hand':
                 robot = self.tfBuffer.lookup_transform(self.handeye_parameters.robot_base_frame,
-                                                    self.handeye_parameters.robot_effector_frame, time,
-                                                    Duration(seconds=1))
+                                                    self.handeye_parameters.robot_effector_frame, time)
             else:
                 robot = self.tfBuffer.lookup_transform(self.handeye_parameters.robot_effector_frame,
-                                                    self.handeye_parameters.robot_base_frame, time,
-                                                    Duration(seconds=1))
+                                                    self.handeye_parameters.robot_base_frame, time)
             tracking = self.tfBuffer.lookup_transform(self.handeye_parameters.tracking_base_frame,
-                                                    self.handeye_parameters.tracking_marker_frame, time,
-                                                    Duration(seconds=1))
+                                                    self.handeye_parameters.tracking_marker_frame, tracker_time)
                                                     
 
         except:

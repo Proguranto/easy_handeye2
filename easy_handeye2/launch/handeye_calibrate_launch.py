@@ -32,7 +32,11 @@ def generate_launch_description():
         ("moveit_package", "geodude_moveit", "Robot moveit package."),
         ("moveit_file", "demo.launch.py", "Moveit file."),
         ("tracker_package", "orbbec_camera", "Package containing tracker\'s launch files."),
-        ("tracker_file", "femto_mega.launch.py", "Tracker\'s launch file."),
+        ("tracker_file", "femto_bolt.launch.py", "Tracker\'s launch file."),
+        ("usb_port", "", "Usb port for camera"),
+        ("device_num", "1", "Camera device number."),
+        ("serial_num", "", "Camera serial number."),
+        ("enable_colored_point_cloud", "true", "Setting for enabling colored pc."),
         ("apriltag_package", "apriltag_ros", "Package containing apriltag\'s node."),
         ("apriltag_file", "apriltag_node", "Apriltag executable."),
         ("image_raw_topic", "/camera/color/image_raw", "Raw camera image topic."),
@@ -42,8 +46,8 @@ def generate_launch_description():
         ("easy_handeye_file", "calibrate.launch.py", "Calibration file for easy_handeye2."),
         ("calibration_type", "eye_on_base", "Type of calibration"),
         ("name", "my_eob_calib", "Name of the calibration"),
-        ("robot_base_frame", "right_wam_base", "Robot base frame"),
-        ("robot_effector_frame", "right_wam5", "Robot effector frame"),
+        ("robot_base_frame", "camera_mount_front_vertical_link", "Robot base frame"),
+        ("robot_effector_frame", "apriltag_bracelet", "Robot effector frame"),
         ("tracking_base_frame", "camera_link", "Tracking base frame"),
         ("tracking_marker_frame", "tag36h11:0", "Tracking marker frame"),
         ("publish_file", "publish.launch.py", "Calibration publisher launch file for easy_handeye2."),
@@ -89,7 +93,13 @@ def generate_launch_description():
                 "launch",
                 LaunchConfiguration("tracker_file"),
             ])
-        ])
+        ]),
+        launch_arguments={
+            "usb_port": LaunchConfiguration("usb_port"),
+            "serial_num": LaunchConfiguration("serial_num"),
+            "device_num": LaunchConfiguration("device_num"),
+            "enable_colored_point_cloud": LaunchConfiguration("enable_colored_point_cloud"),
+        }.items()
     )
 
     apriltag_node = Node(
@@ -213,12 +223,12 @@ def generate_launch_description():
     #     }.items()
     # )
 
-    launch = [moveit_launch, tracker_launch]
-    # launch = [robot_launch, moveit_launch, tracker_launch]
+    # launch = [moveit_launch, tracker_launch]
+    launch = [robot_launch, moveit_launch, tracker_launch]
 
     nodes = [apriltag_node]
 
-    actions = [easy_handeye_action]
-    # actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
+    # actions = [easy_handeye_action]
+    actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
     
     return LaunchDescription(declared_arguments + launch + nodes + actions)
