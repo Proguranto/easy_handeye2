@@ -213,12 +213,12 @@ def generate_launch_description():
     #     }.items()
     # )
 
-    launch = [moveit_launch, tracker_launch]
-    # launch = [robot_launch, moveit_launch, tracker_launch]
+    # launch = [moveit_launch, tracker_launch]
+    launch = [robot_launch, moveit_launch, tracker_launch]
 
     nodes = [apriltag_node]
 
-    actions = [easy_handeye_action]
-    # actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
+    # actions = [easy_handeye_action]
+    actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
     
     return LaunchDescription(declared_arguments + launch + nodes + actions)
