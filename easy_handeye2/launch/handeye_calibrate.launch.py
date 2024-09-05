@@ -33,14 +33,14 @@ def generate_launch_description():
         ("moveit_file", "demo.launch.py", "Moveit file."),
         ("tracker_package", "orbbec_camera", "Package containing tracker\'s launch files."),
         ("tracker_file", "femto_bolt.launch.py", "Tracker\'s launch file."),
+        ("camera_name", "camera", "Camera name."),
         ("usb_port", "", "Usb port for camera"),
         ("device_num", "1", "Camera device number."),
-        ("serial_num", "", "Camera serial number."),
         ("enable_colored_point_cloud", "true", "Setting for enabling colored pc."),
         ("apriltag_package", "apriltag_ros", "Package containing apriltag\'s node."),
         ("apriltag_file", "apriltag_node", "Apriltag executable."),
-        ("image_raw_topic", "/camera/color/image_raw", "Raw camera image topic."),
-        ("camera_info_topic", "/camera/color/camera_info", "Camera info topic."),
+        ("image_raw_topic", "/front_camera/color/image_raw", "Raw camera image topic."),
+        ("camera_info_topic", "/front_camera/color/camera_info", "Camera info topic."),
         ("params_file", "tags_36h11.yaml", "Params file for apriltag node."),
         ("easy_handeye_package", "easy_handeye2", "Package containing easy_handeye2."),
         ("easy_handeye_file", "calibrate.launch.py", "Calibration file for easy_handeye2."),
@@ -48,7 +48,7 @@ def generate_launch_description():
         ("name", "my_eob_calib", "Name of the calibration"),
         ("robot_base_frame", "camera_mount_front_vertical_link", "Robot base frame"),
         ("robot_effector_frame", "apriltag_bracelet", "Robot effector frame"),
-        ("tracking_base_frame", "camera_link", "Tracking base frame"),
+        ("tracking_base_frame", "front_camera_link", "Tracking base frame"),
         ("tracking_marker_frame", "tag36h11:0", "Tracking marker frame"),
         ("publish_file", "publish.launch.py", "Calibration publisher launch file for easy_handeye2."),
     ]
@@ -95,8 +95,8 @@ def generate_launch_description():
             ])
         ]),
         launch_arguments={
+            "camera_name": LaunchConfiguration("camera_name"),
             "usb_port": LaunchConfiguration("usb_port"),
-            "serial_num": LaunchConfiguration("serial_num"),
             "device_num": LaunchConfiguration("device_num"),
             "enable_colored_point_cloud": LaunchConfiguration("enable_colored_point_cloud"),
         }.items()
@@ -117,74 +117,6 @@ def generate_launch_description():
                 LaunchConfiguration("params_file"),
             ])}
         ]
-    )
-
-    activate_right_arm_action = TimerAction(
-        period=4.0,
-        actions=[
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "right_arm_controller", "active"],
-                output="screen",
-                shell=True
-            ),
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_right_arm", "active"],
-                output="screen",
-                shell=True
-            )
-        ],
-        condition=IfCondition(LaunchConfiguration("use_right"))
-    )
-
-    activate_left_arm_action = TimerAction(
-        period=4.0,
-        actions=[
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "left_arm_controller", "active"],
-                output="screen",
-                shell=True
-            ),
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_left_arm", "active"],
-                output="screen",
-                shell=True
-            )
-        ],
-        condition=IfCondition(LaunchConfiguration("use_left"))
-    )
-    
-    activate_right_hand_action = TimerAction(
-        period=4.0,
-        actions=[
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "right_hand_controller", "active"],
-                output="screen",
-                shell=True
-            ),
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_right_hand", "active"],
-                output="screen",
-                shell=True
-            )
-        ],
-        condition=IfCondition(LaunchConfiguration("use_right_hand"))
-    )
-
-    activate_left_hand_action = TimerAction(
-        period=4.0,
-        actions=[
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "left_hand_controller", "active"],
-                output="screen",
-                shell=True
-            ),
-            ExecuteProcess(
-                cmd=["ros2", "control", "set_controller_state", "joint_state_broadcaster_left_hand", "active"],
-                output="screen",
-                shell=True
-            )
-        ],
-        condition=IfCondition(LaunchConfiguration("use_left_hand"))
     )
 
     easy_handeye_action = TimerAction(
@@ -210,25 +142,8 @@ def generate_launch_description():
         ]
     ) 
 
-    # publish_launch = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([
-    #         PathJoinSubstitution([
-    #             FindPackageShare(LaunchConfiguration("easy_handeye_package")),
-    #             "launch",
-    #             LaunchConfiguration("publish_file")
-    #         ])
-    #     ]),
-    #     launch_arguments={
-    #         "name": LaunchConfiguration("name"),
-    #     }.items()
-    # )
-
-    # launch = [moveit_launch, tracker_launch]
-    launch = [robot_launch, moveit_launch, tracker_launch]
-
+    launch = [moveit_launch, tracker_launch]
     nodes = [apriltag_node]
-
-    # actions = [easy_handeye_action]
-    actions = [activate_right_arm_action, activate_left_arm_action, activate_right_hand_action, activate_left_hand_action, easy_handeye_action]
+    actions = [easy_handeye_action]
     
     return LaunchDescription(declared_arguments + launch + nodes + actions)
