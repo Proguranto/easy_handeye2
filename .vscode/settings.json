@@ -1,0 +1,22 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/guranto/Projects/geodude_ws/install/orbbec_camera_msgs/local/lib/python3.10/dist-packages",
+        "/home/guranto/Projects/geodude_ws/build/easy_handeye2",
+        "/home/guranto/Projects/geodude_ws/install/easy_handeye2/lib/python3.10/site-packages",
+        "/home/guranto/Projects/geodude_ws/install/easy_handeye2_msgs/local/lib/python3.10/dist-packages",
+        "/home/guranto/Projects/geodude_ws/build/calibration_errors",
+        "/home/guranto/Projects/geodude_ws/install/calibration_errors/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/guranto/Projects/geodude_ws/install/orbbec_camera_msgs/local/lib/python3.10/dist-packages",
+        "/home/guranto/Projects/geodude_ws/build/easy_handeye2",
+        "/home/guranto/Projects/geodude_ws/install/easy_handeye2/lib/python3.10/site-packages",
+        "/home/guranto/Projects/geodude_ws/install/easy_handeye2_msgs/local/lib/python3.10/dist-packages",
+        "/home/guranto/Projects/geodude_ws/build/calibration_errors",
+        "/home/guranto/Projects/geodude_ws/install/calibration_errors/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
