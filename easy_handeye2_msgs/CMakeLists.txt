@@ -3,7 +3,7 @@ project(easy_handeye2_msgs)
 
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-if("$ENV{ROS_DISTRO}" STRGREATER_EQUAL "iron")
+if("$ENV{ROS_DISTRO}" STREQUAL "iron")
     find_package(service_msgs REQUIRED) # should be automatically added, it doesn't because we have subdirs in srv :\
     set(SERVICE_MSGS_DEPS "service_msgs")
 endif()
