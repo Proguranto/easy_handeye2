@@ -2,12 +2,13 @@
 
 ### Calibration frames
 
-- the **robot frames** should be present in tf (at least the base and the end effector). You can check this by enabling the tf module of Rviz
-- the **tracking** system should also publish the transform between the tracking base (e.g. camera or field generator) and marker
-- in order to be able to visualize the aforementioned transforms at the same time, we advise to make use of an additional static transform publisher between the robot and the tracking system. If the calibration is eye-on-base, this should be between the robot base and the camera; in the eye-on-hand case, between the end effector and the camera
+- The **robot frames** should be present in tf (robot_base -> effector).
+- The **tracking** system should also publish the transform between the tracking base to marker (tracking_base -> marker). 
 
 ### Sampling
-- the **number of samples** must be sufficient and the robot end effector must have moved into **all its degrees of freedom** (e.g. about all axes)
+- The **number of samples** must be sufficient, we recommend at least 10 samples as this is where the algorithm starts to converge (in terms of the transformation and reprojection error).
+- The robot end effector must have moved into **all its degrees of freedom** (about all axes).
+- According to [Tsai-lenz](https://www.semanticscholar.org/paper/A-new-technique-for-fully-autonomous-and-efficient-Tsai-Lenz/4790cf777e9bfd4444668de83c024567c9c3199a), the robot should move in a **random manner**. This is not strictly necessary, but it can help the algorithm converge faster.
 - when acquiring the samples, check that the **tracking is stable** (the marker tf frame is not shaking)
 - when acquiring the samples, check that the **tf frames have stopped moving** (some component of your system might have some delay, so you might have to wait even after the robot has stopped moving)
 - when acquiring the samples, check that the **marker is within the field of view** of the camera (the tf frame might "stop moving" at the edge of the field of view and remain stuck there, because of tf buffering)
